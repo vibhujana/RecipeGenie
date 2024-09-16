@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from rest_framework import generics
-from .serializers import UserSerializer
+from .serializers import UserSerializer, ProfileSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from .models import Profile
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 import openai
@@ -15,6 +16,31 @@ api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key)
 
 import traceback
+
+class ProfileListCreate(generics.ListCreateAPIView): #list profiles created or create a new profile
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Profile.objects.filter(user=user)
+
+    #OVERRIDES default   
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            serializer.save(user=self.request.user)
+        else:
+            print(serializer.errors)
+
+class ProfileDelete(generics.DestroyAPIView): #delete a profile
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Profile.objects.filter(user=user)
+    
+    
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
