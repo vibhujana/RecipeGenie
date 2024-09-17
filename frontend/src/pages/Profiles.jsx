@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../api';
+import Profile from '../components/Profile';
+import "../styles/Profiles.css";
 
 function Profiles() {
     const [profiles, setProfiles] = useState([]);
@@ -58,16 +60,12 @@ function Profiles() {
 
     return (
         <div>
-            <h2>Profiles</h2>
-                <ul>
-                    {profiles.map(profile => (
-                        <li key={profile.id}>
-                            {profile.title} 
-                            <button onClick={() => deleteProfile(profile.id)}>Delete</button>
-                        </li>
+            <div>
+                <h2>Profiles</h2>
+                    {profiles.map((profile) => (
+                        <Profile profile = {profile} onDelete={deleteProfile} key={profile.id}/>
                     ))}
-                </ul>
-
+            </div>
             <h2>Create a Profile</h2>
             <form onSubmit={createProfile}>
                 <label htmlFor="title">Title</label>

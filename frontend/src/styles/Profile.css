@@ -1,0 +1,64 @@
+/* Container for the whole page */
+div {
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Styles for the profile container */
+  .profile-container {
+    padding: 10px;
+    margin: 20px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  /* Styles for the profile title */
+  .profile-title {
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  /* Styles for the profile content */
+  .profile-content {
+    color: #666;
+    margin-top: 10px;
+  }
+  
+  /* Styles for individual sections within the profile */
+  .profile-section {
+    margin-bottom: 15px;
+  }
+  
+  .profile-section label {
+    font-weight: bold;
+    color: #333;
+  }
+  
+  /* Styles for the date or metadata like skill level */
+  .profile-date, .profile-skill-level {
+    color: #999;
+    font-size: 0.9rem;
+  }
+  
+  /* Styles for the ingredients, tools, and other sections */
+  .profile-ingredients, .profile-tools, .profile-budget, .profile-cook-time, .profile-dietary-restrictions {
+    margin-top: 5px;
+    color: #666;
+    font-size: 1rem;
+  }
+  
+  /* Styles for the delete button */
+  .delete-button {
+    background-color: #f44336; /* Red */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .delete-button:hover {
+    background-color: #d32f2f; /* Darker red */
+  }
+  
