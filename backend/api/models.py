@@ -20,6 +20,7 @@ class Profile(models.Model):
     budget = models.PositiveIntegerField()
     cook_time = models.PositiveIntegerField()
     skill_level = models.CharField(max_length=12, choices=SKILL_LEVEL_CHOICES, default=BEGINNER)
+    dietary_restrictions = models.TextField(default="")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='profiles')
     created_at = models.DateTimeField(auto_now_add=True)
 

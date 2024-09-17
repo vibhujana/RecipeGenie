@@ -19,5 +19,5 @@ class UserSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['id', 'title', 'ingredients', 'tools', 'budget', 'cook_time', 'skill_level', 'user', 'created_at']
+        fields = ['id', 'title', 'ingredients', 'tools', 'budget', 'cook_time', 'skill_level', 'dietary_restrictions', 'user', 'created_at']
         extra_kwargs = {'user': {'read_only': True}}
