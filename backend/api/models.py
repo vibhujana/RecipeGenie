@@ -26,3 +26,17 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.title
+
+class Recipe(models.Model):
+    title = models.CharField(max_length=100)
+    ingredients = models.TextField()
+    instructions = models.TextField()
+    preparation_time = models.PositiveIntegerField()  
+    cook_time = models.PositiveIntegerField()
+    servings = models.PositiveIntegerField()
+    nutrition_facts = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title

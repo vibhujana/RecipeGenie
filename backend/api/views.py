@@ -1,15 +1,18 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from rest_framework import generics
-from .serializers import UserSerializer, ProfileSerializer
+from .serializers import UserSerializer, ProfileSerializer, RecipeSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Profile
+from rest_framework.exceptions import ValidationError
+from .models import Profile, Recipe
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
+
 import openai
 from openai import OpenAI
 
 import os
+import json
 
 # Set your OpenAI API key
 api_key = os.getenv('OPENAI_API_KEY')
@@ -40,64 +43,124 @@ class ProfileDelete(generics.DestroyAPIView): #delete a profile
         user = self.request.user
         return Profile.objects.filter(user=user)
     
+
+class RecipeListCreate(generics.ListCreateAPIView):
+    serializer_class = RecipeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Retrieve only recipes created by the authenticated user
+        return Recipe.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        profile_id = self.request.data.get('profile_id')
+        overrides = self.request.data.get('overrides', '')
+        print(user, profile_id, overrides)
+
+        # Validate that profile_id is provided
+        if not profile_id:
+            raise ValidationError("Profile ID is required to create a recipe.")
+
+        # Attempt to retrieve the user's profile
+        try:
+            profile = Profile.objects.get(id=profile_id, user=user)
+        except Profile.DoesNotExist:
+            raise ValidationError("Profile not found for the provided ID.")
+        
+        print(profile)
+
+        # Here, you would generate the recipe using GPT, for now it's hardcoded for testing
+        recipe_data = self.generate_recipe(profile, overrides)
+
+
+        # Ensure all required fields are present in the generated recipe
+        required_fields = ['title', 'ingredients', 'instructions', 'preparation_time', 'cook_time', 'servings', 'nutrition_facts']
+        if not all(key in recipe_data for key in required_fields):
+            raise ValidationError("Incomplete recipe data generated.")
+
+        # Save the recipe data with the user and profile information
+        serializer.save(
+            user=user,
+            title=recipe_data['title'],
+            ingredients=recipe_data['ingredients'],
+            instructions=recipe_data['instructions'],
+            preparation_time=recipe_data['preparation_time'],
+            cook_time=recipe_data['cook_time'],
+            servings=recipe_data['servings'],
+            nutrition_facts =recipe_data['nutrition_facts']
+        )
+
+    def generate_recipe(self, profile, overrides):
+        prompt = f"""
+
+            For ingredients, list the quantity of each ingredient. For example, "1 cup of flour, 2 eggs, 1 teaspoon of salt".
+            You may use ingredients the user has in their pantry, and you do not have to use all of them.
+            If the user has a budget, you may use ingredients that fit within that budget. You do not have to use all of the budget.
+            If the user provides an override, you must not use information that contradicts the override.
+        
+            - Ingredients: {profile.ingredients}
+            - Tools: {profile.tools}
+            - Budget: {profile.budget}
+            - Skill: {profile.skill_level}
+            - Time: {profile.cook_time}
+            - Restrictions: {profile.dietary_restrictions}
+
+            Overrides: {overrides}
+
+            Format the recipe as a JSON:
+            {{
+                "title": "Recipe Title",
+                "ingredients": "Comma-separated ingredients",
+                "tools": "Comma-separated tools",
+                "instructions": "Newline-separated instructions",
+                "preparation_time": "Minutes",
+                "cook_time": "Minutes",
+                "servings": "Servings",
+                "nutrition_facts": "Newline-separated nutrition facts"
+            }}
+        """
+
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                response_format={"type":"json_object"},
+                messages=[
+                    {"role": "system", "content": "You are a recipe bot. Generate a recipe based on the user's profile:"},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+
+            generated_text = response.choices[0].message.content
+            print(f"Generated text: {generated_text}")
+            recipe_data = json.loads(generated_text)
+
+            required_fields = ['title', 'ingredients', 'instructions', 'preparation_time', 'cook_time', 'servings', 'nutrition_facts']
+            if not all(key in recipe_data for key in required_fields):
+                raise ValidationError("Incomplete recipe data returned by GPT.")
+            
+            return recipe_data
+
+        except json.JSONDecodeError:
+            raise ValidationError("Failed to parse GPT response as JSON.")
+        except openai.error.OpenAIError as e:
+            print(f"OpenAI API error: {e}")
+            raise ValidationError(f"OpenAI API error: {str(e)}")
+        except Exception as e:
+            print(f"Internal Server Error: {e}")
+            raise ValidationError(f"Internal server error: {str(e)}")
+
+class RecipeDelete(generics.DestroyAPIView): #delete a recipe
+    serializer_class = RecipeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Recipe.objects.filter(user=user)
+    
     
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
-
-@api_view(['POST'])
-def generate_prompt(request):
-    prompt = request.data.get('prompt')
-
-    if not prompt:
-        return JsonResponse({'error': 'Prompt is required'}, status=400)
-
-    try:
-        user_data = {
-        "ingredients": "eggs, tofu, water, garlic powder, italian seasoning",
-        "tools": "Electric Stove, Pots, Pans, Measuring Cup",
-        "budget": 100,
-        "skill_level": "Intermediate"
-        }
-        user_ingredients = user_data["ingredients"]
-        user_tools = user_data["tools"]
-        user_budget = user_data["budget"]
-        user_skill_level = user_data["skill_level"]
-        complete_prompt = f"""
-        You are a recipe bot that creates tasty and realistic recipes. The user will give you a list of ingredients and you will generate a recipe using those ingredients. The user may give other restrictions such as budget for extra ingredients or dietary restrictions. The user will also give cook time and skill level. At the bottom, the user will provid addition information. If there is a contradiction, use the additional information. Output the recipe as a json so I can format it for the front end and save in a database.
-
-        Current user information:
-        - Ingredients: {user_ingredients}
-        - Tools: {user_tools}
-        - Budget: {user_budget}
-        - Skill Level: {user_skill_level}
-
-        User prompt:
-        {prompt}
-        """
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a recipe bot that creates tasty and realistic recipes. The user will give you a list of ingredients and you will generate a recipe using those ingredients. NOTE You do not have to use all the ingredients. Only the ones that makes sense. The user may give other restrictions such as budget for extrea ingredients or dietary restrictions. If there is a good recipe, but the user does not have the ingredients, you can use it if it is in budget. The user will also give cook time and skill level. Format the recipel like a recipe youd find on the internet. Also generate the nutrition facts for number of servings and nutritions for serving"},
-                {"role": "user", "content": complete_prompt}
-            ]
-        )
-
-        generated_text = response.choices[0].message.content
-        print(generated_text)
-
-        if not generated_text:
-            return JsonResponse({'error': 'Failed to generate a valid response from OpenAI'}, status=500)
-
-        return JsonResponse({'response': generated_text}, status=200)
-
-    except openai.error.OpenAIError as e:
-        print("OpenAI Error:", e)
-        print(traceback.format_exc())
-        return JsonResponse({'error': f"OpenAI API error: {str(e)}"}, status=500)
-    except Exception as e:
-        print("Internal Server Error:", e)
-        print(traceback.format_exc())
-        return JsonResponse({'error': f"Internal server error: {str(e)}"}, status=500)
