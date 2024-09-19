@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import api from '../api';
 import Recipe from '../components/Recipe';
 import "../styles/Recipes.css";
+import LoadingIndicator from '../components/LoadingIndicator'
 
 function Recipes() {
     const [recipes, setRecipes] = useState([]);
     const [profiles, setProfiles] = useState([]);
     const [profileId, setProfileId] = useState('');
     const [overrides, setOverrides] = useState('');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         getRecipes();
@@ -45,6 +47,7 @@ function Recipes() {
     }
 
     const createRecipe = (e) => {
+        setLoading(true)
         e.preventDefault();
         const newRecipeData = {
             profile_id: profileId,
@@ -66,6 +69,7 @@ function Recipes() {
             } else {
                 alert('Recipe creation failed');
             }
+            setLoading(false)
         })
         .catch((error) => {
             if (error.response) {
@@ -118,6 +122,7 @@ function Recipes() {
                     placeholder='Enter any customizations or overrides as text'
                 />
                 <br />
+                {loading && <LoadingIndicator />}
                 <input type="submit" value="Create Recipe" />
             </form>
         </div>

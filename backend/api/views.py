@@ -94,7 +94,13 @@ class RecipeListCreate(generics.ListCreateAPIView):
     def generate_recipe(self, profile, overrides):
         prompt = f"""
 
-            For ingredients, list the quantity of each ingredient. For example, "1 cup of flour, 2 eggs, 1 teaspoon of salt".
+            For ingredients, list the quantity of each ingredient. For example, "1 cup of flour, 2 eggs, 1 teaspoon of salt". Be exact with the units.
+            Assume the user has basic ingredients: salt, pepper, and water
+            Assume the user has basic tools: knife, cutting board, pot, and pan
+            For nutritions, list the quantity of each nutrition. For example, "10g of protein, 20g of fat, 30g of carbs". Be exact with the units.
+            For nutritions, include: calories, total fat, saturated fat, trans fat, colestrol, sodium, total carbohydrates, dietary fiber, sugars, protein, vitamin D, calcium, iron, potassium. 
+            For vitamins if there is not a significant amount, you can exclude it.
+            For instructions, list the steps to prepare the recipe. For example, "Step 1: Preheat the oven to 350 degrees. Step 2: Mix the flour, eggs, and salt in a bowl."
             You may use ingredients the user has in their pantry, and you do not have to use all of them.
             If the user has a budget, you may use ingredients that fit within that budget. You do not have to use all of the budget.
             If the user provides an override, you must not use information that contradicts the override.
