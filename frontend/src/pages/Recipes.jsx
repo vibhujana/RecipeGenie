@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import api from '../api';
 import Recipe from '../components/Recipe';
 import "../styles/Recipes.css";
-import LoadingIndicator from '../components/LoadingIndicator'
+import LoadingIndicator from '../components/LoadingIndicator';
+import NavBar from "../components/Navbar";
+import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
 
 function Recipes() {
     const [recipes, setRecipes] = useState([]);
@@ -20,7 +22,6 @@ function Recipes() {
         api.get("/api/recipes/")
         .then((res) => {
             setRecipes(res.data);
-            console.log(res.data);
         })
         .catch((err) => alert(err));
     };
@@ -29,7 +30,6 @@ function Recipes() {
         api.get("/api/profiles/")
         .then((res) => {
             setProfiles(res.data);
-            console.log(res.data);
         })
         .catch((err) => alert(err));
     }
@@ -47,7 +47,7 @@ function Recipes() {
     }
 
     const createRecipe = (e) => {
-        setLoading(true)
+        setLoading(true);
         e.preventDefault();
         const newRecipeData = {
             profile_id: profileId,
@@ -69,63 +69,71 @@ function Recipes() {
             } else {
                 alert('Recipe creation failed');
             }
-            setLoading(false)
+            setLoading(false);
         })
         .catch((error) => {
-            if (error.response) {
-                console.error('Error response:', error.response);
-                alert('Error: ' + (error.response.data.detail || error.response.statusText));
-            } else if (error.request) {
-                console.error('Error request:', error.request);
-                alert('No response received from the server.');
-            } else {
-                console.error('Error message:', error.message);
-                alert('Error: ' + error.message);
-            }
+            setLoading(false);
+            alert('Error: ' + (error.response?.data?.detail || error.message));
         });
     }
-    
-    
 
     return (
-        <div>
-            <div>
-                <h2>Recipes</h2>
-                {recipes.map((recipe) => (
-                    <Recipe recipe={recipe} onDelete={deleteRecipe} key={recipe.id} />
-                ))}
-            </div>
-            <h2>Create a Recipe</h2>
-            <form onSubmit={createRecipe}>
-                <label htmlFor="profileId">Select Profile</label>
-                <br />
-                <select
-                    id="profileId"
-                    value={profileId}
-                    required
-                    onChange={(e) => setProfileId(e.target.value)}
-                >
-                    <option value="">--Select Profile--</option>
-                    {profiles.map((profile) => (
-                        <option key={profile.id} value={profile.id}>
-                            {profile.title} {/* Assuming profiles have a 'name' attribute */}
-                        </option>
-                    ))}
-                </select>
-                <br />
-                <label htmlFor="overrides">Overrides (optional)</label>
-                <br />
-                <textarea
-                    id="overrides"
-                    value={overrides}  // Bind to the string value of overrides
-                    onChange={(e) => setOverrides(e.target.value)}  // Update as a string
-                    placeholder='Enter any customizations or overrides as text'
-                />
-                <br />
-                {loading && <LoadingIndicator />}
-                <input type="submit" value="Create Recipe" />
-            </form>
-        </div>
+        <Container>
+            <NavBar />
+            <Row className="my-4">
+                <Col>
+                    <h2>Recipes</h2>
+                    {recipes.length === 0 ? (
+                        <p>No recipes available.</p>
+                    ) : (
+                        recipes.map((recipe) => (
+                            <Recipe recipe={recipe} onDelete={deleteRecipe} key={recipe.id} />
+                        ))
+                    )}
+                </Col>
+            </Row>
+            <Row className="my-4">
+                <Col>
+                    <Card>
+                        <Card.Body>
+                            <Card.Title>Create a Recipe</Card.Title>
+                            <Form onSubmit={createRecipe}>
+                                <Form.Group controlId="profileId">
+                                    <Form.Label>Select Profile</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={profileId}
+                                        required
+                                        onChange={(e) => setProfileId(e.target.value)}
+                                    >
+                                        <option value="">--Select Profile--</option>
+                                        {profiles.map((profile) => (
+                                            <option key={profile.id} value={profile.id}>
+                                                {profile.title} {/* Assuming profiles have a 'title' attribute */}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="overrides">
+                                    <Form.Label>Overrides (optional)</Form.Label>
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={3}
+                                        value={overrides}
+                                        onChange={(e) => setOverrides(e.target.value)}
+                                        placeholder='Enter any customizations or overrides as text'
+                                    />
+                                </Form.Group>
+                                {loading && <LoadingIndicator />}
+                                <Button variant="primary" type="submit" className="mt-3">
+                                    Create Recipe
+                                </Button>
+                            </Form>
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
+        </Container>
     );
 }
 

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import api from '../api';
 import Profile from '../components/Profile';
 import "../styles/Profiles.css";
+import NavBar from "../components/Navbar";
+import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 
 function Profiles() {
     const [profiles, setProfiles] = useState([]);
@@ -21,8 +23,8 @@ function Profiles() {
 
     const getProfiles = () => {
         api.get("/api/profiles/")
-        .then((res) => {setProfiles(res.data); console.log(res.data);})
-        .catch((err) => alert(err));
+            .then((res) => { setProfiles(res.data); console.log(res.data); })
+            .catch((err) => alert(err));
     };
 
     const deleteProfile = (id) => {
@@ -34,7 +36,7 @@ function Profiles() {
                 alert('Profile deletion failed');
             }
         }).catch((error) => alert(error));
-    }
+    };
 
     const createProfile = (e) => {
         e.preventDefault();
@@ -56,93 +58,93 @@ function Profiles() {
                 alert('Profile creation failed');
             }
         }).catch((error) => alert(error));
-    }
+    };
 
     return (
-        <div>
-            <div>
-                <h2>Profiles</h2>
+        <Container>
+            <NavBar />
+            <Row>
+                <Col md={8}>
+                    <h2 className="mt-4">Profiles</h2>
                     {profiles.map((profile) => (
-                        <Profile profile = {profile} onDelete={deleteProfile} key={profile.id}/>
+                        <Profile profile={profile} onDelete={deleteProfile} key={profile.id} />
                     ))}
-            </div>
-            <h2>Create a Profile</h2>
-            <form onSubmit={createProfile}>
-                <label htmlFor="title">Title</label>
-                <br />
-                <input 
-                    type="text" 
-                    id="title"
-                    value={title} 
-                    required
-                    onChange={(e) => setTitle(e.target.value)} 
-                />
-                <br />
-                <label htmlFor="ingredients">Ingredients</label>
-                <br />
-                <textarea
-                    id="ingredients"
-                    value={ingredients}
-                    required
-                    onChange={(e) => setIngredients(e.target.value)}
-                />
-                <br />
-                <label htmlFor="tools">Tools</label>
-                <br />
-                <textarea
-                    id="tools"
-                    value={tools}
-                    required
-                    onChange={(e) => setTools(e.target.value)}
-                />
-                <br />
-                <label htmlFor="budget">Budget</label>
-                <br />
-                <input 
-                    type="number" 
-                    id="budget"
-                    value={budget} 
-                    required
-                    onChange={(e) => setBudget(e.target.value)}
-                />
-                <br />
-                <label htmlFor="cookTime">Cook Time</label>
-                <br />
-                <input 
-                    type="number" 
-                    id="cookTime"
-                    value={cookTime} 
-                    required
-                    onChange={(e) => setCookTime(e.target.value)}
-                />
-                <br />
-                <label htmlFor="skillLevel">Skill Level</label>
-                <br />
-                <select 
-                    id="skillLevel"
-                    value={skillLevel} 
-                    required
-                    onChange={(e) => setSkillLevel(e.target.value)}
-                >
-                    {skillLevels.map((level) => (
-                        <option key={level} value={level}>{level}</option>
-                    ))}
-                </select>
-                <br />
-                <label htmlFor="dietaryRestrictions">Dietary Restrictions</label>
-                <br />
-                <input 
-                    type="text" 
-                    id="dietaryRestrictions"
-                    value={dietaryRestrictions} 
-                    required
-                    onChange={(e) => setDietaryRestrictions(e.target.value)}
-                />
-                <br />
-                <input type="submit" value="Create Profile" />
-            </form>
-
-        </div>
+                </Col>
+                <Col md={4}>
+                    <h2 className="mt-4">Create a Profile</h2>
+                    <Form onSubmit={createProfile} className="mb-4">
+                        <Form.Group controlId="title">
+                            <Form.Label>Title</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={title}
+                                required
+                                onChange={(e) => setTitle(e.target.value)}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="ingredients">
+                            <Form.Label>Ingredients</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                value={ingredients}
+                                required
+                                onChange={(e) => setIngredients(e.target.value)}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="tools">
+                            <Form.Label>Tools</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                value={tools}
+                                required
+                                onChange={(e) => setTools(e.target.value)}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="budget">
+                            <Form.Label>Budget</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={budget}
+                                required
+                                onChange={(e) => setBudget(e.target.value)}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="cookTime">
+                            <Form.Label>Cook Time</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={cookTime}
+                                required
+                                onChange={(e) => setCookTime(e.target.value)}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="skillLevel">
+                            <Form.Label>Skill Level</Form.Label>
+                            <Form.Control
+                                as="select"
+                                value={skillLevel}
+                                required
+                                onChange={(e) => setSkillLevel(e.target.value)}
+                            >
+                                {skillLevels.map((level) => (
+                                    <option key={level} value={level}>{level}</option>
+                                ))}
+                            </Form.Control>
+                        </Form.Group>
+                        <Form.Group controlId="dietaryRestrictions">
+                            <Form.Label>Dietary Restrictions</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={dietaryRestrictions}
+                                required
+                                onChange={(e) => setDietaryRestrictions(e.target.value)}
+                            />
+                        </Form.Group>
+                        <Button variant="primary" type="submit">Create Profile</Button>
+                    </Form>
+                </Col>
+            </Row>
+        </Container>
     );
 }
 

@@ -1,63 +1,24 @@
-/* Container for the whole page */
-div {
-    font-family: Arial, sans-serif;
-}
-
-/* Styles for the recipe container */
+/* Recipe.css */
 .recipe-container {
-    padding: 10px;
-    margin: 20px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s;
 }
 
-/* Styles for the recipe title */
+.recipe-container:hover {
+    transform: scale(1.02);
+}
+
 .recipe-title {
-    color: #333;
     font-size: 1.5rem;
     font-weight: bold;
 }
 
-/* Styles for the recipe content */
-.recipe-content {
-    color: #666;
-    margin-top: 10px;
-}
-
-/* Styles for individual sections within the recipe */
-.recipe-section {
-    margin-bottom: 15px;
-}
-
-.recipe-section label {
-    font-weight: bold;
-    color: #333;
-}
-
-/* Styles for the date or metadata like servings */
-.recipe-date, .recipe-servings {
-    color: #999;
-    font-size: 0.9rem;
-}
-
-/* Styles for the ingredients, tools, and other sections */
-.recipe-ingredients, .recipe-instructions, .recipe-preparationTime, .recipe-cookTime, .recipe-servings, .recipe-nutritionFacts {
-    margin-top: 5px;
-    color: #666;
-    font-size: 1rem;
-}
-
-/* Styles for the delete button */
-.recipe-delete {
-    background-color: #f44336; /* Red */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.recipe-delete:hover {
-    background-color: #d32f2f; /* Darker red */
+.recipe-ingredients,
+.recipe-instructions,
+.recipe-preparationTime,
+.recipe-cookTime,
+.recipe-servings,
+.recipe-nutritionFacts,
+.recipe-date {
+    margin: 0.5rem 0;
 }

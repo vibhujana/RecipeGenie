@@ -5,6 +5,9 @@ packages=(
   "axios"
   "react-router-dom"
   "jwt-decode"
+  "react-bootstrap"
+  "react-bootstrap-icons"
+  "bootstrap"
 )
 
 # Install each package
