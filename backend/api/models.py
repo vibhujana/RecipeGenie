@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.db.models import Func
 from django.contrib.auth.models import User
 
 
@@ -40,3 +40,20 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.title
+    
+
+class Ingredient(models.Model):
+    foundation_foods = models.JSONField()
+    description = models.TextField()
+
+    def save(self, *args, **kwargs):
+        self.description = self.foundation_foods.get('description', '')
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Data ID: {self.id}"
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['description'])
+        ]
